@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import queue
 import subprocess
+import sys
 import threading
 import time
 from dataclasses import dataclass
@@ -14,6 +15,12 @@ from tkinter import filedialog, messagebox, ttk
 
 
 EXCEL_EXTS = {".xls", ".xlsx", ".xlsm", ".xlsb"}
+
+
+def app_base_dir() -> Path:
+    if getattr(sys, "frozen", False):
+        return Path(getattr(sys, "_MEIPASS", Path(sys.executable).parent))
+    return Path(__file__).resolve().parent
 
 
 def is_excel_file(path: Path) -> bool:
@@ -263,7 +270,7 @@ class ExcelMergeWorker(threading.Thread):
                 pass
 
     def _run_impl_powershell(self) -> None:
-        script_path = Path(__file__).with_name("merge_excel_sheets.ps1")
+        script_path = app_base_dir() / "merge_excel_sheets.ps1"
         if not script_path.exists():
             raise RuntimeError(f"必要なスクリプトが見つかりません: {script_path}")
 
